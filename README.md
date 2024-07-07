@@ -35,7 +35,6 @@ The DocMan system is expected to be built using the following technologies:
 
 * **Programming Language:** Python 3.x
 * **GUI Framework:** PyQt6
-* **Database:** To be determined (e.g., SQLite, PostgreSQL, etc.)
 
 The choice of Python 3.x and PyQt6 is based on their ease of use, flexibility, and extensive libraries for building robust and scalable applications.
 
