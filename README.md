@@ -4,6 +4,11 @@
 -----------
 DocMan is a document management system designed to help manage large amounts of data and speed up investigative workflows in OSINT (Open-Source Intelligence) work. The system will provide a centralized interface for creating, editing, and managing documents, as well as advanced features for searching, categorizing, and analyzing documents.
 
+**Background**
+-------------
+
+DocMan is being developed in response to the needs identified during the [BackdropBuild](https://BackdropBuild.com) project, a collaborative effort to improve the efficiency and effectiveness of OSINT investigations. BackdropBuild is a 4-week program that runs from **July 8th, 2024** to **August 3rd, 2024**, where participants can work on their projects and receive funding and support.
+
 **Expected Features**
 --------------------
 
