@@ -2,7 +2,7 @@
 =====================================
 **Overview**
 -----------
-DocMan is a document management system designed to help manage large amounts of data and speed up investigative workflows in OSINT (Open-Source Intelligence) work. The system will provide a centralized interface for creating, editing, and managing documents, as well as advanced features for searching, categorizing, and analyzing documents.
+DocMan is a document management system designed to help manage large amounts of data and speed up investigative workflows in OSINT (Open-Source Intelligence) work. The system will provide a centralized interface for creating, editing, and managing documents.
 
 **Background**
 -------------
@@ -19,13 +19,13 @@ The following features are expected to be included in the initial release of Doc
 * Centralized document repository for easy access and management
 * Document templates for standardized reporting
 * Version control and collaboration tools for multiple users
-* Advanced search capabilities with filtering and categorization
+* Document tagging and categorization for easy organization
 
-### Document Analysis
+### Document Editing
 
-* Entity extraction for identifying key entities and relationships
-* Network analysis for visualizing connections between entities
-* Data visualization for presenting complex data in a clear and actionable manner
+* Integrated document editor with formatting and styling options
+* Support for common file formats (e.g. PDF, DOCX, TXT)
+* Real-time collaboration and commenting tools
 
 ### User Interface
 
@@ -53,7 +53,8 @@ The DocMan system will be designed with a modular architecture, allowing for eas
 
 * Improved efficiency and productivity in OSINT workflows
 * Enhanced collaboration and data sharing capabilities
-* Advanced analytics and visualization capabilities for better insights and decision-making
+* Better organization and management of documents
+* Increased accuracy and consistency in reporting
 
 **Note on Feature Development**
 -----------------------------
