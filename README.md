@@ -1,5 +1,15 @@
 # DocMan: OSINT Document Manager
 
+BACK-DROP-BUILD:v5:2024:PROJECT
+### Completed Aspects
+- Implemented main window layout with a side menu and central widget using PyQt6.
+- Integrated asynchronous image loading for the side menu logo.
+- Setup toolbar with buttons for navigation (Home, Help).
+- Created `DocumentsWindow` and `DocumenterWindow` classes for managing different views.
+- Developed functionality to switch between `DocumentsWindow` and `DocumenterWindow` based on user interactions.
+- Applied styling to enhance the visual appeal and usability of the application interface.
+
+
 ## Overview
 DocMan is a document management system designed to improve efficiency and streamline workflows in OSINT (Open-Source Intelligence) investigations. It provides a centralized interface for managing documents, catering to the specific needs identified during the BackdropBuild project.
 
