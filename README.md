@@ -50,7 +50,7 @@ The DocMan system will be designed with a modular architecture, allowing for eas
 
 **Benefits**
 ------------
-
+`Unlike general-purpose document management tools, DocMan is built with OSINT in mind, making it more efficient and effective for documenting OSINT research. Its features will likely include organized note-taking, easy recording of digital information, and a secure and verifiable process for tracking notes, similar to Forensic Notes.`
 * Improved efficiency and productivity in OSINT workflows
 * Enhanced collaboration and data sharing capabilities
 * Better organization and management of documents
