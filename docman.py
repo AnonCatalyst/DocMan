@@ -134,14 +134,22 @@ class MainStackedWidget(QStackedWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.home_window = HomeWindow()
+        self.help_window = HelpWindow()
         self.documents_window = DocumentsWindow()
         self.documenter_window = DocumenterWindow()
 
+        self.addWidget(self.home_window)
+        self.addWidget(self.help_window)
         self.addWidget(self.documents_window)
         self.addWidget(self.documenter_window)
 
     def show_window(self, window):
-        if window == DocumentsWindow:
+        if window == HomeWindow:
+            self.setCurrentWidget(self.home_window)
+        elif window == HelpWindow:
+            self.setCurrentWidget(self.help_window)
+        elif window == DocumentsWindow:
             self.setCurrentWidget(self.documents_window)
         elif window == DocumenterWindow:
             self.setCurrentWidget(self.documenter_window)
@@ -152,6 +160,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("DocMan")
         self.setGeometry(300, 300, 1100, 600)
+        self.setFixedWidth(1100)  # Set a fixed width
 
         self.setup_toolbar()
         self.setup_central_widget()
@@ -185,7 +194,17 @@ class MainWindow(QMainWindow):
     def add_toolbar_button(self, toolbar, text):
         button = QPushButton(text)
         button.setStyleSheet("padding: 8px; font-size: 14px; background-color: #2c3e50; color: #ecf0f1; border: none;")
+        button.clicked.connect(self.handle_toolbar_button_click)
         toolbar.addWidget(button)
+
+    def handle_toolbar_button_click(self):
+        sender = self.sender()  # Get the button that triggered the signal
+        if sender:
+            item_name = sender.text()
+            if item_name == "Home":
+                self.show_window(HomeWindow)
+            elif item_name == "Help":
+                self.show_window(HelpWindow)
 
     def setup_central_widget(self):
         central_widget = QWidget()
@@ -218,6 +237,49 @@ class MainWindow(QMainWindow):
 
     def show_window(self, window_class):
         self.stacked_widget.show_window(window_class)
+
+class HomeWindow(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        welcome_label = QLabel("Welcome to DocMan!")
+        welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        welcome_label.setStyleSheet("color: #ecf0f1; font-size: 20px;")
+        layout.addWidget(welcome_label)
+
+        description_label = QLabel("DocMan is designed to streamline OSINT documentation tasks and enhance your workflow.")
+        description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        description_label.setStyleSheet("color: #ecf0f1; font-size: 14px;")
+        layout.addWidget(description_label)
+        layout.addStretch()
+
+class HelpWindow(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        help_label = QLabel("How DocMan Helps:")
+        help_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        help_label.setStyleSheet("color: #ecf0f1; font-size: 20px;")
+        layout.addWidget(help_label)
+
+        help_description = QLabel("""DocMan speeds up OSINT documentation tasks by providing a robust document management system. 
+Developed in anticipation of the July 8th-August 3rd BackDropBuild v5 Session, DocMan offers several key features:
+> https://backdropbuild.com/builds/v5/osint-document-manager
+        
+1. **Document Organization:** Easily manage and organize large volumes of documents, ensuring that important- 
+ information is always at your fingertips.
+2. **Efficient Data Handling:** Streamline data handling processes to reduce time spent on administrative- 
+ tasks and increase time available for analysis.
+3. **User-Friendly Interface:** Benefit from a user-friendly interface that simplifies navigation and improves overall user experience.
+4. **GitHub Repository:** For more details, visit the DocMan repository on GitHub by AnonCatalyst.
+
+DocMan is designed to enhance efficiency in managing large amounts of data, making it an invaluable tool for OSINT investigations. 
+Explore the full potential of DocMan to streamline your workflow and improve investigative outcomes.""")
+       
+        help_description.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        help_description.setStyleSheet("color: #ecf0f1; font-size: 14px;")
+        layout.addWidget(help_description)
+        layout.addStretch()
 
 def main():
     app = QApplication(sys.argv)
