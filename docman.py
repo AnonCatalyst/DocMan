@@ -40,7 +40,7 @@ class SideMenu(QWidget):
         self.layout.addWidget(self.logo_separator)
 
         # Centered title
-        self.logo_description = QLabel(" DocMan MENU ")
+        self.logo_description = QLabel(" DOCMAN MENU ")
         self.logo_description.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.logo_description.setStyleSheet("color: #888888; font-size: 10px;")
         self.layout.addWidget(self.logo_description)
@@ -73,9 +73,24 @@ class SideMenu(QWidget):
         self.layout.addWidget(self.button_separator)
 
         # Centered description text
-        self.button_description = QLabel(""" ~ Back Drop Build:v5:2024
-DocMan: Document Manager
-- Speed up your workflow!""")
+        self.button_description = QLabel("""DocMan was developed during
+the 2024 v5 BackDropBuild
+session (July 8 - August
+3, 2024) to enhance OSINT
+investigations. This four
+-week program provided fu
+nding and support for inn
+ovative solutions. DocMan
+was created to meet the 
+specific needs of OSINT 
+professionals, offering a
+robust document managemen
+t system. The development
+focused on modern softwar
+e practices, modular arch
+itecture, and user-centri
+c design to improve workf
+lows and data management.""")
         self.button_description.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.button_description.setStyleSheet("color: #888888; font-size: 10px;")
         self.layout.addWidget(self.button_description)
