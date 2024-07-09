@@ -1,50 +1,36 @@
 # DocMan: OSINT Document Manager
-https://backdropbuild.com/builds/v5/osint-document-manager
 
-BACK-DROP-BUILD:v5:2024:PROJECT
-### Completed Aspects
-- Implemented main window layout with a side menu and central widget using PyQt6.
-- Integrated asynchronous image loading for the side menu logo.
-- Setup toolbar with buttons for navigation (Home, Help).
-- Created `DocumentsWindow` and `DocumenterWindow` classes for managing different views.
-- Developed functionality to switch between `DocumentsWindow` and `DocumenterWindow` based on user interactions.
-- Applied styling to enhance the visual appeal and usability of the application interface.
+DocMan is a document management system designed to streamline workflows and improve efficiency in OSINT investigations. Developed as a result of participation in the BackDropBuild v5 session from July 8th to August 3rd, DocMan provides a centralized interface for managing, editing, and organizing documents, facilitating collaboration and enhancing productivity.
 
+## BackDropBuild v5 Session
 
-## Overview
-DocMan is a document management system designed to improve efficiency and streamline workflows in OSINT (Open-Source Intelligence) investigations. It provides a centralized interface for managing documents, catering to the specific needs identified during the BackdropBuild project.
+BackDropBuild v5 is a collaborative session focused on developing tools and solutions for enhancing OSINT capabilities. Held from July 8th to August 3rd, the session aims to address challenges in open-source intelligence gathering by fostering innovation and collaboration among participants.
 
-## Features
-### Document Management
-- Centralized document repository for easy access and management
-- Document templates for standardized reporting
-- Version control and collaboration tools for multiple users
-- Document tagging and categorization for easy organization
+Learn more about [BackDropBuild](https://backdropbuild.com).
 
-### Document Editing
-- Integrated document editor with formatting and styling options
-- Support for common file formats (e.g., PDF, DOCX, TXT)
-- Real-time collaboration and commenting tools
+Explore the specific build session for DocMan at [BackDropBuild v5 - OSINT Document Manager](https://backdropbuild.com/builds/v5/osint-document-manager).
 
-### User Interface
-- Intuitive and user-friendly interface for easy navigation and use
-- Customizable dashboard for personalized workflow management
-- Role-based access control for secure collaboration and data sharing
+## What is BackDropBuild?
 
-## Technical Details
-- **Programming Language:** Python 3.x
-- **GUI Framework:** PyQt6
+BackDropBuild is an initiative that brings together experts and enthusiasts in various fields to collaborate on developing innovative tools and solutions for specific challenges. It provides a platform for intensive sessions, such as v5, which focuses on advancing OSINT capabilities through creative and collaborative efforts.
 
-DocMan utilizes Python for backend logic and PyQt6 for the graphical interface, chosen for their flexibility and extensive libraries suitable for building robust applications.
+## Why DocMan?
 
-## Design
-DocMan adopts a modular architecture to facilitate seamless integration of new features and components, emphasizing modern software development practices for scalability and maintainability.
+DocMan stands out as a dedicated tool tailored specifically to speed up OSINT documentation workflows. Each feature in DocMan contributes to this goal:
 
-## Benefits
-- Enhanced efficiency and productivity in OSINT workflows
-- Improved collaboration and data sharing capabilities
-- Better organization and management of documents
-- Increased accuracy and consistency in reporting
+- **Centralized Document Repository:** Provides quick access to all documents related to an investigation, reducing time spent searching for information.
+  
+- **Document Templates:** Standardizes reporting formats, saving time on formatting and ensuring consistency in documentation.
+  
+- **Version Control and Collaboration Tools:** Facilitates real-time collaboration among team members, enhancing efficiency in document review and updates.
+  
+- **Integrated Editor:** Offers formatting and styling options directly within the application, eliminating the need to switch between tools for document editing.
+  
+- **Real-Time Collaboration and Commenting:** Enables instant feedback and discussion on documents, speeding up the review process.
+  
+- **Customizable Dashboard:** Tailors the interface to individual workflow preferences, optimizing user interaction and task management.
+  
+- **Role-Based Access Control:** Ensures secure and controlled access to sensitive information, maintaining data integrity and compliance.
 
-## Note on Feature Development
-As DocMan continues to evolve based on user feedback and emerging requirements, features and design elements may be refined or adjusted during the development process.
+By focusing on these specific needs of OSINT practitioners, DocMan enhances workflow efficiency, accuracy, and collaboration in document management, making it an indispensable tool for accelerating investigative processes.
+
