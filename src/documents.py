@@ -1,17 +1,8 @@
-import os
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTreeView, QPushButton, QInputDialog, QMessageBox, QToolBar
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTreeView, QPushButton, QInputDialog, QMessageBox, QToolBar, QApplication
 from PyQt6.QtGui import QFileSystemModel, QIcon
-from PyQt6.QtCore import Qt, QSize, pyqtSignal, QFileInfo, QThread
+from PyQt6.QtCore import Qt, QSize, QFileInfo, QTimer, pyqtSignal
 
-class FileOperationThread(QThread):
-    def __init__(self, operation, *args, **kwargs):
-        super().__init__()
-        self.operation = operation
-        self.args = args
-        self.kwargs = kwargs
-
-    def run(self):
-        self.operation(*self.args, **self.kwargs)
+import os
 
 class DocumentsWindow(QWidget):
     open_document = pyqtSignal(str)  # Signal to indicate opening a document
@@ -102,14 +93,13 @@ class DocumentsWindow(QWidget):
             return
 
         file_path = self.model.filePath(index)
-        if QMessageBox.question(self, "Delete", f"Are you sure you want to delete '{file_path}'?",
-                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+        confirmation = QMessageBox.question(self, "Delete", f"Are you sure you want to delete '{file_path}'?",
+                                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if confirmation == QMessageBox.StandardButton.Yes:
             if self.model.isDir(index):
-                operation_thread = FileOperationThread(self.model.rmdir, index)
-                operation_thread.start()
+                self.model.rmdir(index)
             else:
-                operation_thread = FileOperationThread(self.model.remove, index)
-                operation_thread.start()
+                self.model.remove(index)
 
     def rename_item(self):
         index = self.tree.currentIndex()
@@ -117,19 +107,32 @@ class DocumentsWindow(QWidget):
             return
 
         old_file_path = self.model.filePath(index)
-        old_file_name = os.path.basename(old_file_path)
-        new_file_name, ok = QInputDialog.getText(self, "Rename", "New name:", text=old_file_name)
-        if ok and new_file_name:
-            new_file_path = os.path.join(os.path.dirname(old_file_path), new_file_name)
-            operation_thread = FileOperationThread(self.rename_file, old_file_path, new_file_path)
-            operation_thread.start()
+        old_file_name = self.model.fileName(index)
 
-    def rename_file(self, old_path, new_path):
-        try:
-            os.rename(old_path, new_path)
-            self.model.refresh(self.model.index(os.path.dirname(new_path)))
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Failed to rename the item: {e}")
+        new_file_name, ok = QInputDialog.getText(self, "Rename", "New name:", text=old_file_name)
+        if ok and new_file_name and new_file_name != old_file_name:
+            new_file_path = os.path.join(os.path.dirname(old_file_path), new_file_name)
+            if os.path.exists(new_file_path):
+                QMessageBox.warning(self, "Error", "A file with the same name already exists.")
+                return
+
+            try:
+                os.rename(old_file_path, new_file_path)
+            except OSError as e:
+                QMessageBox.warning(self, "Error", f"Failed to rename the file: {e}")
+                return
+
+            # Update the model and UI after renaming
+            self.model.layoutAboutToBeChanged.emit()
+            self.model.setRootPath(self.model.rootPath())
+            self.model.layoutChanged.emit()
+
+            # Update properties display if the renamed file is currently selected
+            selected_index = self.tree.currentIndex()
+            if selected_index.isValid() and selected_index == index:
+                self.show_properties()
+
+            QMessageBox.information(self, "Rename", f"File '{old_file_name}' renamed to '{new_file_name}'.")
 
     def open_item(self):
         index = self.tree.currentIndex()
@@ -137,8 +140,8 @@ class DocumentsWindow(QWidget):
             return
 
         file_path = self.model.filePath(index)
-        if not self.model.isDir(index):  # Check if the selected item is a file
-            self.open_document.emit(file_path)  # Emit the signal with the file path
+        if not self.model.isDir(index):
+            self.open_document.emit(file_path)  # Emit signal to open the document
 
     def show_properties(self):
         index = self.tree.currentIndex()
@@ -150,14 +153,23 @@ class DocumentsWindow(QWidget):
         properties = f"Name: {file_info.fileName()}\n"
         properties += f"Path: {file_info.absoluteFilePath()}\n"
         properties += f"Size: {file_info.size()} bytes\n"
-        properties += f"Last Modified: {file_info.lastModified().toString('yyyy-MM-dd hh:mm:ss')}"
+        properties += f"Modified: {file_info.lastModified().toString(Qt.DateFormat.ISODate)}"
+
         QMessageBox.information(self, "Properties", properties)
 
     def go_up(self):
-        current_index = self.tree.rootIndex()
-        if not current_index.isValid():
+        index = self.tree.currentIndex()
+        if not index.isValid():
             return
 
-        parent_index = self.model.parent(current_index)
+        parent_index = self.model.parent(index)
         if parent_index.isValid():
             self.tree.setRootIndex(parent_index)
+
+if __name__ == "__main__":
+    import sys
+
+    app = QApplication(sys.argv)
+    window = DocumentsWindow()
+    window.show()
+    sys.exit(app.exec())

@@ -1,9 +1,6 @@
-import sys
 import os
-import threading
-import markdown
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QComboBox, QLineEdit, QMessageBox, QTabWidget, QHBoxLayout, QFileDialog, QStatusBar
-from PyQt6.QtCore import pyqtSignal, pyqtSlot
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QComboBox, QLineEdit, QMessageBox, QTabWidget, QHBoxLayout, QFileDialog, QStatusBar
+from PyQt6.QtCore import pyqtSignal
 
 class Documenter(QWidget):
     open_document = pyqtSignal(str)
@@ -47,6 +44,11 @@ class Documenter(QWidget):
 
         # Add initial tab for first document
         self.add_document_tab()
+
+        self.setLayout(self.layout)
+
+        # List to keep track of file threads
+        self.file_threads = []
 
     def add_document_tab(self):
         # Create a new tab for a document
@@ -129,3 +131,4 @@ class Documenter(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load file {file_path}: {e}")
+
