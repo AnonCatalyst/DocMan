@@ -1,0 +1,9 @@
+DocMan/
+├── docman.py
+├── requirements.txt
+└── src/
+    ├── documenter.py
+    ├── documents.py
+    └── assets/
+        └── icons/
+            └── side_logo.png
