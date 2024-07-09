@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTreeView, QPushButton, QInputDialog, QMessageBox, QToolBar, QApplication
 from PyQt6.QtGui import QFileSystemModel, QIcon
-from PyQt6.QtCore import Qt, QSize, QFileInfo, QTimer, pyqtSignal
-
+from PyQt6.QtCore import Qt, QSize, pyqtSignal, QMimeData
 import os
+import shutil
 
 class DocumentsWindow(QWidget):
     open_document = pyqtSignal(str)  # Signal to indicate opening a document
@@ -21,6 +21,14 @@ class DocumentsWindow(QWidget):
         self.tree.setRootIndex(self.model.index('src/docs'))
         self.tree.setSelectionMode(QTreeView.SelectionMode.SingleSelection)
         self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
+
+        # Enable drag and drop
+        self.tree.setDragEnabled(True)
+        self.tree.setAcceptDrops(True)
+        self.tree.setDragDropMode(QTreeView.DragDropMode.InternalMove)
+
+        # Set text wrap mode 
+        self.tree.setTextElideMode(Qt.TextElideMode.ElideNone)
 
         # Connect double click event to slot
         self.tree.doubleClicked.connect(self.handle_double_click)
@@ -80,12 +88,44 @@ class DocumentsWindow(QWidget):
 
         folder_name, ok = QInputDialog.getText(self, "Create Folder", "Folder name:")
         if ok and folder_name:
-            if not self.model.mkdir(index, folder_name).isValid():
-                QMessageBox.warning(self, "Error", "Failed to create the folder.")
-            else:
-                # Navigate to parent directory
-                parent_index = self.model.parent(index)
-                self.tree.setRootIndex(parent_index)
+            # Get the path of the current index
+            current_path = self.model.filePath(index)
+            if not current_path:
+                current_path = self.model.rootPath()
+
+            # If the current path points to a file, use its directory as parent
+            if os.path.isfile(current_path):
+                current_path = os.path.dirname(current_path)
+
+            # Append the new folder name to the current path
+            new_folder_path = os.path.join(current_path, folder_name)
+
+            # Check if the parent directory exists and is a directory
+            parent_path = os.path.dirname(new_folder_path)
+            if not os.path.isdir(parent_path):
+                QMessageBox.warning(self, "Error", "Parent directory does not exist or is not a directory.")
+                return
+
+            # Check if the folder already exists
+            if os.path.exists(new_folder_path):
+                QMessageBox.warning(self, "Error", "Folder already exists.")
+                return
+
+            # Attempt to create the directory
+            try:
+                os.makedirs(new_folder_path)
+            except OSError as e:
+                QMessageBox.warning(self, "Error", f"Failed to create the folder: {e}")
+                return
+
+            # Update the model and UI after creating the folder
+            self.model.layoutAboutToBeChanged.emit()
+            self.model.setRootPath(self.model.rootPath())
+            self.model.layoutChanged.emit()
+
+            # Navigate to parent directory
+            parent_index = self.model.index(os.path.dirname(new_folder_path))
+            self.tree.setRootIndex(parent_index)
 
     def delete_item(self):
         index = self.tree.currentIndex()
@@ -149,11 +189,10 @@ class DocumentsWindow(QWidget):
             return
 
         file_path = self.model.filePath(index)
-        file_info = QFileInfo(file_path)
-        properties = f"Name: {file_info.fileName()}\n"
-        properties += f"Path: {file_info.absoluteFilePath()}\n"
-        properties += f"Size: {file_info.size()} bytes\n"
-        properties += f"Modified: {file_info.lastModified().toString(Qt.DateFormat.ISODate)}"
+        properties = f"Name: {self.model.fileName(index)}\n"
+        properties += f"Path: {file_path}\n"
+        properties += f"Size: {self.model.size(index)} bytes\n"
+        properties += f"Modified: {self.model.lastModified(index).toString(Qt.DateFormat.ISODate)}"
 
         QMessageBox.information(self, "Properties", properties)
 
@@ -166,10 +205,33 @@ class DocumentsWindow(QWidget):
         if parent_index.isValid():
             self.tree.setRootIndex(parent_index)
 
-if __name__ == "__main__":
-    import sys
+    def drop_event(self, event):
+        drop_action = event.dropAction()
+        drop_index = self.tree.indexAt(event.pos())
+        if not drop_index.isValid():
+            return
 
-    app = QApplication(sys.argv)
-    window = DocumentsWindow()
-    window.show()
-    sys.exit(app.exec())
+        drop_path = self.model.filePath(drop_index)
+
+        mime_data = event.mimeData()
+        if mime_data.hasUrls():
+            for url in mime_data.urls():
+                source_path = url.toLocalFile()
+                if os.path.isdir(source_path):
+                    # Dragged item is a directory, copy or move it
+                    if drop_action == Qt.DropAction.CopyAction:
+                        shutil.copytree(source_path, os.path.join(drop_path, os.path.basename(source_path)))
+                    elif drop_action == Qt.DropAction.MoveAction:
+                        shutil.move(source_path, os.path.join(drop_path, os.path.basename(source_path)))
+                else:
+                    # Dragged item is a file, copy or move it
+                    if drop_action == Qt.DropAction.CopyAction:
+                        shutil.copy(source_path, drop_path)
+                    elif drop_action == Qt.DropAction.MoveAction:
+                        shutil.move(source_path, drop_path)
+
+        event.acceptProposedAction()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
