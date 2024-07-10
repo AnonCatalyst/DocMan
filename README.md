@@ -36,3 +36,7 @@ DocMan stands out as a dedicated tool tailored specifically to speed up OSINT do
 
 By focusing on these specific needs of OSINT practitioners, DocMan enhances workflow efficiency, accuracy, and collaboration in document management, making it an indispensable tool for accelerating investigative processes.
 
+# INSTALL & RUN!
+- `git clone https://github.com/AnonCatalyst/DocMan && cd DocMan`
+- `pip install -r requirements.txt --break-system-packages`
+- `python3 docman.py`
