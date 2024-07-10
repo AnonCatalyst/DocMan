@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QToolBar, QLabel, QVBoxLayout, QWidget, 
-    QPushButton, QDockWidget, QFrame, QStackedWidget
+    QPushButton, QDockWidget, QFrame, QStackedWidget, QTextBrowser
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QThread
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QUrl
+from PyQt6.QtGui import QPixmap, QDesktopServices
 import os
 import sys
 
@@ -31,6 +31,7 @@ class SideMenu(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.image_loader = None
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -125,9 +126,11 @@ lows and data management.""")
 
     def cleanup_thread(self):
         """Cleans up the image loader thread."""
-        self.image_loader.quit()
-        self.image_loader.wait()
-        self.image_loader.deleteLater()
+        if self.image_loader is not None:
+            self.image_loader.quit()
+            self.image_loader.wait()
+            self.image_loader.deleteLater()
+            self.image_loader = None
 
     def handle_menu_item_click(self):
         """Handles menu item clicks to switch windows."""
@@ -140,8 +143,7 @@ lows and data management.""")
                 self.parent.show_window(Documenter)
 
     def closeEvent(self, event):
-        if hasattr(self, 'image_loader'):
-            self.cleanup_thread()
+        self.cleanup_thread()
         event.accept()
 
 
@@ -267,7 +269,10 @@ class HomeWindow(QWidget):
         welcome_label.setStyleSheet("color: #ecf0f1; font-size: 20px;")
         layout.addWidget(welcome_label)
 
-        description_label = QLabel("DocMan is designed to streamline OSINT documentation tasks.")
+        description_label = QLabel("""DocMan is designed to streamline OSINT documentation tasks.
+DocMan helps speed up OSINT documentation tasks by providing a user-friendly interface 
+and efficient management of documents and related data. This tool is developed as part 
+of the BackDropBuild v5 session and aims to improve workflow in OSINT investigations.""")
         description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         description_label.setStyleSheet("color: #ecf0f1; font-size: 14px;")
         layout.addWidget(description_label)
@@ -276,20 +281,56 @@ class HomeWindow(QWidget):
 class HelpWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        
+        self.setWindowTitle("DocMan Help")
+        self.setGeometry(100, 100, 600, 400)
+        
         layout = QVBoxLayout(self)
-        help_label = QLabel("Help")
-        help_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        help_label.setStyleSheet("color: #ecf0f1; font-size: 20px;")
-        layout.addWidget(help_label)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Title
+        title_label = QLabel("Welcome to DocMan Help")
+        title_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #ecf0f1;")
+        layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        # Help text
+        help_text = """
+        <p>New to DocMan? Here’s how to get started:</p>
+        <ul style="margin-left: 20px;">
+            <li>Explore documentation and document management options using the side menu.</li>
+            <li>Visit the HOME window to learn more about DocMan's features.</li>
+            <li>For support or bug reports, return to this section.</li>
+            <li>Manage your documents under the "DOCUMENTS" option in the side menu. This feature helps 
+                speed up your OSINT workflow by organizing and accessing critical information efficiently.</li>
+            <li>Create single or multiple documentation files using the "DOCUMENTER" option in the side menu. 
+                This tool is a dream for OSINT professionals, enabling them to streamline their investigative process 
+                by quickly generating detailed documentation.</li>
+        </ul>
+        
+        <p>Support or Report bugs?</p>
+        <ul style="list-style-type: none; margin-left: 20px;">
+            <li>Email: hard2find.co.01@gmail.com</li>
+            <li>Instagram: @istoleyourbutter</li>
+            <li>Github: AnonCatalyst</li>
+            <li>Discord: 6TFBKgjaAz</li>
+        </ul>
+        """
 
-        description_label = QLabel("Use the side menu to navigate through different sections of the application.")
-        description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        description_label.setStyleSheet("color: #ecf0f1; font-size: 14px;")
-        layout.addWidget(description_label)
+        help_browser = QTextBrowser()
+        help_browser.setHtml(help_text)
+        help_browser.setStyleSheet("color: #bdc3c7; font-size: 14px; font-family: Arial, sans-serif; background-color: #34495e;")
+        help_browser.setReadOnly(True)  # Ensure the text is read-only
+        
+        layout.addWidget(help_browser)
+        
+        self.setStyleSheet("background-color: #2c3e50;")
+
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec())
+    main()
