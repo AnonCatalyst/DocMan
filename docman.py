@@ -272,7 +272,21 @@ class HomeWindow(QWidget):
         description_label = QLabel("""DocMan is designed to streamline OSINT documentation tasks.
 DocMan helps speed up OSINT documentation tasks by providing a user-friendly interface 
 and efficient management of documents and related data. This tool is developed as part 
-of the BackDropBuild v5 session and aims to improve workflow in OSINT investigations.""")
+of the BackDropBuild v5 session and aims to improve workflow in OSINT investigations.
+
+DocMan Features
+---------------------
+‣ Document Editor: A tabbed interface for editing multiple documents simultaneously. 
+‣ Open Files: Ability to open files in the document editor from the file manager.
+‣ Save Documents: Ability to save all open documents with a single button click. 
+‣ Open File Dialog: A file dialog for opening files from the file system. 
+‣ File Manager: A file manager GUI for navigating and managing files and directories. 
+‣ Create Folders: Ability to create new folders in the file manager. 
+‣ Delete Items: Ability to delete files and folders in the file manager. 
+‣ Rename Items: Ability to rename files and folders in the file manager. 
+‣ Drag-and-Drop: Support for drag-and-drop operations to copy or move files and folders. 
+‣ Display File Properties: Ability to display file properties such as name, path, size, and modified date. 
+‣ Status Bar: A status bar that displays messages and notifications.""")
         description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         description_label.setStyleSheet("color: #ecf0f1; font-size: 14px;")
         layout.addWidget(description_label)
