@@ -6,8 +6,6 @@ DocMan is a document management system designed to streamline workflows and impr
 
 # TO-DO
 - `Better design the home window`
-- `Add the option to save documents individually`
-- `Add more formats to save documents as`
 - `Add Logging Window activated through a button on the top bar where HOME and HELP are located`
 
 ### DocMan: Documents & Documenter Window Update
