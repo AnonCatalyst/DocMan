@@ -1,237 +1,229 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTreeView, QPushButton, QInputDialog, QMessageBox, QToolBar, QApplication
-from PyQt6.QtGui import QFileSystemModel, QIcon
-from PyQt6.QtCore import Qt, QSize, pyqtSignal, QMimeData
+import sys
 import os
 import shutil
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QWidget, QTreeView, QInputDialog, 
+    QMessageBox, QToolBar, QLabel, QSplitter
+)
+from PyQt6.QtGui import QIcon, QAction, QFileSystemModel, QPixmap, QPainter, QPen
+from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex
+
+
+class ToolbarWithDividers(QToolBar):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+    
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setPen(QPen(Qt.GlobalColor.darkGray, 1, Qt.PenStyle.SolidLine))
+        painter.drawLine(0, 0, 0, self.height())
+
 
 class DocumentsWindow(QWidget):
     open_document = pyqtSignal(str)  # Signal to indicate opening a document
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.layout = QVBoxLayout(self)
+        self.setup_ui()
+        self.clipboard = []
 
-        # Initialize the file system model
+    def setup_ui(self):
+        """Initialize UI components."""
         self.model = QFileSystemModel()
-        self.model.setRootPath('src/docs')  # Root path for the file manager
-        
-        # Initialize the tree view
+        self.model.setRootPath('')  # Set to the root path you want to display
+        self.model.setReadOnly(False)
+
         self.tree = QTreeView()
         self.tree.setModel(self.model)
-        self.tree.setRootIndex(self.model.index('src/docs'))
-        self.tree.setSelectionMode(QTreeView.SelectionMode.SingleSelection)
+        self.tree.setRootIndex(self.model.index('src/docs'))  # Change to the desired root directory
+        self.tree.setSelectionMode(QTreeView.SelectionMode.ExtendedSelection)
         self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
-
-        # Enable drag and drop
         self.tree.setDragEnabled(True)
         self.tree.setAcceptDrops(True)
-        self.tree.setDragDropMode(QTreeView.DragDropMode.InternalMove)
-
-        # Set text wrap mode 
+        self.tree.setDragDropMode(QTreeView.DragDropMode.DragDrop)
+        self.tree.setDropIndicatorShown(True)
         self.tree.setTextElideMode(Qt.TextElideMode.ElideNone)
-
-        # Connect double click event to slot
         self.tree.doubleClicked.connect(self.handle_double_click)
+        self.tree.selectionModel().selectionChanged.connect(self.update_preview)
 
-        # Add the tree view to the layout
-        self.layout.addWidget(self.tree)
+        self.preview = QLabel("Preview Pane")
+        self.preview.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.preview.setWordWrap(True)
+        self.preview.setFixedWidth(300)  # Adjust as necessary
 
-        # Initialize toolbar
-        self.toolbar = QToolBar()
+        splitter = QSplitter()
+        splitter.addWidget(self.tree)
+        splitter.addWidget(self.preview)
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 1)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(splitter)
+
+        self.toolbar = ToolbarWithDividers()
         self.toolbar.setIconSize(QSize(16, 16))
+        self.setup_actions()
+        self.layout.addWidget(self.toolbar, alignment=Qt.AlignmentFlag.AlignRight)
 
-        # Create and add buttons to the toolbar
-        self.create_folder_button = QPushButton(QIcon.fromTheme("folder-new"), "Create Folder")
-        self.create_folder_button.clicked.connect(self.create_folder)
-        self.toolbar.addWidget(self.create_folder_button)
-
-        self.delete_button = QPushButton(QIcon.fromTheme("edit-delete"), "Delete")
-        self.delete_button.clicked.connect(self.delete_item)
-        self.toolbar.addWidget(self.delete_button)
-
-        self.rename_button = QPushButton(QIcon.fromTheme("edit-rename"), "Rename")
-        self.rename_button.clicked.connect(self.rename_item)
-        self.toolbar.addWidget(self.rename_button)
-
-        self.open_button = QPushButton(QIcon.fromTheme("document-open"), "Open")
-        self.open_button.clicked.connect(self.open_item)  # Connect to open_item method
-        self.toolbar.addWidget(self.open_button)
-
-        self.properties_button = QPushButton(QIcon.fromTheme("document-properties"), "Properties")
-        self.properties_button.clicked.connect(self.show_properties)
-        self.toolbar.addWidget(self.properties_button)
-
-        # Add "Go Up" button to navigate to parent directory
-        self.go_up_button = QPushButton(QIcon.fromTheme("go-up"), "Go Up")
-        self.go_up_button.clicked.connect(self.go_up)
-        self.toolbar.addWidget(self.go_up_button)
-
-        # Add the toolbar to the layout
-        self.layout.addWidget(self.toolbar)
-
-        # Set layout
         self.setLayout(self.layout)
 
-    def handle_double_click(self, index):
-        if not index.isValid():
-            return
+    def setup_actions(self):
+        """Setup toolbar actions."""
+        actions = [
+            ("folder-new", "Create Folder", self.create_folder),
+            ("edit-delete", "Delete", self.delete_item),
+            ("edit-rename", "Rename", self.rename_item),
+            ("document-open", "Open", self.open_item),
+            ("document-properties", "Properties", self.show_properties),
+            ("go-up", "Go Up", self.go_up),
+            ("edit-cut", "Cut", self.cut_item),
+            ("edit-copy", "Copy", self.copy_item),
+            ("edit-paste", "Paste", self.paste_item),
+            ("view-refresh", "Batch Process", self.batch_process),
+            ("tag", "Tag Document", self.tag_item)
+        ]
 
-        if self.model.isDir(index):
+        for idx, (icon, text, slot) in enumerate(actions):
+            action = QAction(QIcon.fromTheme(icon), text, self)
+            action.triggered.connect(slot)
+            self.toolbar.addAction(action)
+            if idx < len(actions) - 1:
+                self.toolbar.addSeparator()
+
+    def handle_double_click(self, index: QModelIndex):
+        """Handle double click event on a tree view item."""
+        item_path = self.model.filePath(index)
+        if os.path.isdir(item_path):
             self.tree.setRootIndex(index)
         else:
             self.open_item()
 
     def create_folder(self):
+        """Create a new folder in the current directory."""
         index = self.tree.currentIndex()
         if not index.isValid():
-            index = self.model.index('src/docs')
+            index = self.model.index(self.model.rootPath())
 
         folder_name, ok = QInputDialog.getText(self, "Create Folder", "Folder name:")
         if ok and folder_name:
-            # Get the path of the current index
-            current_path = self.model.filePath(index)
-            if not current_path:
-                current_path = self.model.rootPath()
-
-            # If the current path points to a file, use its directory as parent
-            if os.path.isfile(current_path):
-                current_path = os.path.dirname(current_path)
-
-            # Append the new folder name to the current path
-            new_folder_path = os.path.join(current_path, folder_name)
-
-            # Check if the parent directory exists and is a directory
-            parent_path = os.path.dirname(new_folder_path)
-            if not os.path.isdir(parent_path):
-                QMessageBox.warning(self, "Error", "Parent directory does not exist or is not a directory.")
-                return
-
-            # Check if the folder already exists
-            if os.path.exists(new_folder_path):
-                QMessageBox.warning(self, "Error", "Folder already exists.")
-                return
-
-            # Attempt to create the directory
-            try:
-                os.makedirs(new_folder_path)
-            except OSError as e:
-                QMessageBox.warning(self, "Error", f"Failed to create the folder: {e}")
-                return
-
-            # Update the model and UI after creating the folder
-            self.model.layoutAboutToBeChanged.emit()
-            self.model.setRootPath(self.model.rootPath())
-            self.model.layoutChanged.emit()
-
-            # Navigate to parent directory
-            parent_index = self.model.index(os.path.dirname(new_folder_path))
-            self.tree.setRootIndex(parent_index)
+            parent_path = self.model.filePath(index)
+            new_folder_path = os.path.join(parent_path, folder_name)
+            os.makedirs(new_folder_path, exist_ok=True)
+            self.model.refresh(index)
 
     def delete_item(self):
-        index = self.tree.currentIndex()
-        if not index.isValid():
-            return
-
-        file_path = self.model.filePath(index)
-        confirmation = QMessageBox.question(self, "Delete", f"Are you sure you want to delete '{file_path}'?",
-                                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if confirmation == QMessageBox.StandardButton.Yes:
-            if self.model.isDir(index):
-                self.model.rmdir(index)
-            else:
+        """Delete the selected file or folder."""
+        indexes = self.tree.selectedIndexes()
+        for index in indexes:
+            if index.column() == 0:  # We only want to delete each item once
+                file_path = self.model.filePath(index)
+                if os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                else:
+                    os.remove(file_path)
                 self.model.remove(index)
 
     def rename_item(self):
+        """Rename the selected file or folder."""
         index = self.tree.currentIndex()
-        if not index.isValid():
-            return
-
-        old_file_path = self.model.filePath(index)
-        old_file_name = self.model.fileName(index)
-
-        new_file_name, ok = QInputDialog.getText(self, "Rename", "New name:", text=old_file_name)
-        if ok and new_file_name and new_file_name != old_file_name:
-            new_file_path = os.path.join(os.path.dirname(old_file_path), new_file_name)
-            if os.path.exists(new_file_path):
-                QMessageBox.warning(self, "Error", "A file with the same name already exists.")
-                return
-
-            try:
-                os.rename(old_file_path, new_file_path)
-            except OSError as e:
-                QMessageBox.warning(self, "Error", f"Failed to rename the file: {e}")
-                return
-
-            # Update the model and UI after renaming
-            self.model.layoutAboutToBeChanged.emit()
-            self.model.setRootPath(self.model.rootPath())
-            self.model.layoutChanged.emit()
-
-            # Update properties display if the renamed file is currently selected
-            selected_index = self.tree.currentIndex()
-            if selected_index.isValid() and selected_index == index:
-                self.show_properties()
-
-            QMessageBox.information(self, "Rename", f"File '{old_file_name}' renamed to '{new_file_name}'.")
+        if index.isValid():
+            item_path = self.model.filePath(index)
+            new_name, ok = QInputDialog.getText(self, "Rename", "New name:", text=os.path.basename(item_path))
+            if ok and new_name:
+                new_path = os.path.join(os.path.dirname(item_path), new_name)
+                os.rename(item_path, new_path)
+                self.model.refresh(index.parent())
 
     def open_item(self):
+        """Open the selected file."""
         index = self.tree.currentIndex()
-        if not index.isValid():
-            return
-
-        file_path = self.model.filePath(index)
-        if not self.model.isDir(index):
-            self.open_document.emit(file_path)  # Emit signal to open the document
+        if index.isValid():
+            item_path = self.model.filePath(index)
+            if os.path.isfile(item_path):
+                self.open_document.emit(item_path)
 
     def show_properties(self):
+        """Show properties of the selected file or folder."""
         index = self.tree.currentIndex()
-        if not index.isValid():
-            return
-
-        file_path = self.model.filePath(index)
-        properties = f"Name: {self.model.fileName(index)}\n"
-        properties += f"Path: {file_path}\n"
-        properties += f"Size: {self.model.size(index)} bytes\n"
-        properties += f"Modified: {self.model.lastModified(index).toString(Qt.DateFormat.ISODate)}"
-
-        QMessageBox.information(self, "Properties", properties)
+        if index.isValid():
+            item_path = self.model.filePath(index)
+            properties = f"Name: {os.path.basename(item_path)}\nSize: {os.path.getsize(item_path)} bytes"
+            QMessageBox.information(self, "Properties", properties)
 
     def go_up(self):
+        """Navigate to the parent directory."""
+        current_root = self.tree.rootIndex()
+        if current_root.isValid():
+            parent_index = self.model.parent(current_root)
+            if parent_index.isValid():
+                self.tree.setRootIndex(parent_index)
+
+    def cut_item(self):
+        """Cut the selected item."""
         index = self.tree.currentIndex()
-        if not index.isValid():
-            return
+        if index.isValid():
+            self.clipboard = (self.model.filePath(index), 'cut')
 
-        parent_index = self.model.parent(index)
-        if parent_index.isValid():
-            self.tree.setRootIndex(parent_index)
+    def copy_item(self):
+        """Copy the selected item."""
+        index = self.tree.currentIndex()
+        if index.isValid():
+            self.clipboard = (self.model.filePath(index), 'copy')
 
-    def drop_event(self, event):
-        drop_action = event.dropAction()
-        drop_index = self.tree.indexAt(event.pos())
-        if not drop_index.isValid():
-            return
+    def paste_item(self):
+        """Paste the item from the clipboard."""
+        index = self.tree.currentIndex()
+        if index.isValid() and self.clipboard:
+            destination_path = self.model.filePath(index)
+            source_path, action = self.clipboard
 
-        drop_path = self.model.filePath(drop_index)
-
-        mime_data = event.mimeData()
-        if mime_data.hasUrls():
-            for url in mime_data.urls():
-                source_path = url.toLocalFile()
+            if action == 'cut':
+                shutil.move(source_path, destination_path)
+            elif action == 'copy':
                 if os.path.isdir(source_path):
-                    # Dragged item is a directory, copy or move it
-                    if drop_action == Qt.DropAction.CopyAction:
-                        shutil.copytree(source_path, os.path.join(drop_path, os.path.basename(source_path)))
-                    elif drop_action == Qt.DropAction.MoveAction:
-                        shutil.move(source_path, os.path.join(drop_path, os.path.basename(source_path)))
+                    shutil.copytree(source_path, os.path.join(destination_path, os.path.basename(source_path)))
                 else:
-                    # Dragged item is a file, copy or move it
-                    if drop_action == Qt.DropAction.CopyAction:
-                        shutil.copy(source_path, drop_path)
-                    elif drop_action == Qt.DropAction.MoveAction:
-                        shutil.move(source_path, drop_path)
+                    shutil.copy(source_path, destination_path)
 
-        event.acceptProposedAction()
+            self.model.refresh(self.model.index(destination_path))
 
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
+    def batch_process(self):
+        """Batch process selected items."""
+        indexes = self.tree.selectedIndexes()
+        if not indexes:
+            return
+
+        actions = ["Rename", "Delete"]
+        action, ok = QInputDialog.getItem(self, "Batch Process", "Select action:", actions, 0, False)
+        if ok and action:
+            for index in indexes:
+                if index.column() == 0:
+                    if action == "Rename":
+                        self.rename_item()
+                    elif action == "Delete":
+                        self.delete_item()
+
+    def tag_item(self):
+        """Tag the selected item."""
+        indexes = self.tree.selectedIndexes()
+        if not indexes:
+            return
+
+        tag, ok = QInputDialog.getText(self, "Tag Document", "Enter tag:")
+        if ok and tag:
+            for index in indexes:
+                if index.column() == 0:
+                    item_path = self.model.filePath(index)
+
+    def update_preview(self):
+        """Update the preview pane with the selected item's content."""
+        index = self.tree.currentIndex()
+        if index.isValid():
+            item_path = self.model.filePath(index)
+            if os.path.isdir(item_path):
+                self.preview.setText("Directory: " + item_path)
+            else:
+                with open(item_path, 'r') as file:
+                    content = file.read(1024)  # Read the first 1024 bytes
+                    self.preview.setText(content)
