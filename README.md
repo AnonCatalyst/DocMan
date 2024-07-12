@@ -5,7 +5,6 @@ DocMan is a document management system designed to streamline workflows and impr
 <img src="src/img/screenshot.png" alt="DocMan: Document Manager (GUI) - screenshot" width="700" height="400"/>
 
 # TO-DO
-- `Fix issue causing not being able to drop files/folders into folders (drag&drop)`
 - `Better design the home window`
 - `Add the option to save documents individually`
 - `Add more formats to save documents as`
