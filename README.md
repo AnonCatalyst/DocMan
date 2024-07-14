@@ -5,7 +5,6 @@ DocMan is a document management system designed to streamline workflows and impr
 <img src="src/img/screenshot.png" alt="DocMan: Document Manager (GUI) - screenshot" width="700" height="400"/>
 
 # TO-DO
-- `Better design the home window`
 - `Add Logging Window activated through a button on the top bar where HOME and HELP are located`
 
 ### DocMan: Documents & Documenter Window Update
