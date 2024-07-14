@@ -9,6 +9,7 @@ from PyQt6.QtGui import QIcon, QAction, QFileSystemModel, QPixmap, QPainter, QPe
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex
 
 
+
 class ToolbarWithDividers(QToolBar):
     def __init__(self, parent=None):
         super().__init__(parent)
