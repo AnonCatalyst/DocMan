@@ -6,6 +6,7 @@ DocMan is a document management system designed to streamline workflows and impr
 
 # TO-DO
 - `Add Logging Window activated through a button on the top bar where HOME and HELP are located`
+- `Add an icon for DocMan`
 
 ### DocMan: Documents & Documenter Window Update
 
