@@ -10,6 +10,8 @@ import sys
 # Import custom windows
 from src.documents import DocumentsWindow
 from src.documenter import Documenter
+from src.help import HelpWindow
+from src.home import HomeWindow
 
 
 class ImageLoader(QThread):
@@ -259,85 +261,6 @@ class MainWindow(QMainWindow):
         """Shows the specified window in the stacked widget."""
         self.stacked_widget.show_window(window_class)
 
-
-class HomeWindow(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QVBoxLayout(self)
-        welcome_label = QLabel("Welcome to DocMan!")
-        welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        welcome_label.setStyleSheet("color: #ecf0f1; font-size: 20px;")
-        layout.addWidget(welcome_label)
-
-        description_label = QLabel("""DocMan is designed to streamline OSINT documentation tasks.
-DocMan helps speed up OSINT documentation tasks by providing a user-friendly interface 
-and efficient management of documents and related data. This tool is developed as part 
-of the BackDropBuild v5 session and aims to improve workflow in OSINT investigations.
-
-DocMan Features
----------------------
-‣ Document Editor: A tabbed interface for editing multiple documents simultaneously. 
-‣ Open Files: Ability to open files in the document editor from the file manager.
-‣ Save Documents: Ability to save all open documents with a single button click. 
-‣ Open File Dialog: A file dialog for opening files from the file system. 
-‣ File Manager: A file manager GUI for navigating and managing files and directories. 
-‣ Create Folders: Ability to create new folders in the file manager. 
-‣ Delete Items: Ability to delete files and folders in the file manager. 
-‣ Rename Items: Ability to rename files and folders in the file manager. 
-‣ Drag-and-Drop: Support for drag-and-drop operations to copy or move files and folders. 
-‣ Display File Properties: Ability to display file properties such as name, path, size, and modified date. 
-‣ Status Bar: A status bar that displays messages and notifications.""")
-        description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        description_label.setStyleSheet("color: #ecf0f1; font-size: 14px;")
-        layout.addWidget(description_label)
-
-
-class HelpWindow(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        
-        self.setWindowTitle("DocMan Help")
-        self.setGeometry(100, 100, 600, 400)
-        
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        
-        # Title
-        title_label = QLabel("Welcome to DocMan Help")
-        title_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #ecf0f1;")
-        layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        # Help text
-        help_text = """
-        <p>New to DocMan? Here’s how to get started:</p>
-        <ul style="margin-left: 20px;">
-            <li>Explore documentation and document management options using the side menu.</li>
-            <li>Visit the HOME window to learn more about DocMan's features.</li>
-            <li>For support or bug reports, return to this section.</li>
-            <li>Manage your documents under the "DOCUMENTS" option in the side menu. This feature helps 
-                speed up your OSINT workflow by organizing and accessing critical information efficiently.</li>
-            <li>Create single or multiple documentation files using the "DOCUMENTER" option in the side menu. 
-                This tool is a dream for OSINT professionals, enabling them to streamline their investigative process 
-                by quickly generating detailed documentation.</li>
-        </ul>
-        
-        <p>Support or Report bugs?</p>
-        <ul style="list-style-type: none; margin-left: 20px;">
-            <li>Email: hard2find.co.01@gmail.com</li>
-            <li>Instagram: @istoleyourbutter</li>
-            <li>Github: AnonCatalyst</li>
-            <li>Discord: 6TFBKgjaAz</li>
-        </ul>
-        """
-
-        help_browser = QTextBrowser()
-        help_browser.setHtml(help_text)
-        help_browser.setStyleSheet("color: #bdc3c7; font-size: 14px; font-family: Arial, sans-serif; background-color: #34495e;")
-        help_browser.setReadOnly(True)  # Ensure the text is read-only
-        
-        layout.addWidget(help_browser)
-        
-        self.setStyleSheet("background-color: #2c3e50;")
 
 def main():
     app = QApplication(sys.argv)
