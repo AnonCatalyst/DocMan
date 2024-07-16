@@ -224,7 +224,7 @@ class MainWindow(QMainWindow):
 
         self.add_toolbar_button(toolbar, "HOME")
         self.add_toolbar_button(toolbar, "HELP")
-        self.add_toolbar_button(toolbar, "LOGGING")
+        self.add_toolbar_button(toolbar, "LOGS")
 
     def add_toolbar_button(self, toolbar, text):
         button = QPushButton(text)
