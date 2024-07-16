@@ -3,13 +3,14 @@ from PyQt6.QtWidgets import (
     QMessageBox, QTabWidget, QHBoxLayout, QFileDialog, QStatusBar, QMenu
 )
 from PyQt6.QtCore import pyqtSignal, Qt
-
+from src.logging import LoggingWindow
 
 class Documenter(QWidget):
     open_document = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.logger = LoggingWindow()
         self.layout = QVBoxLayout(self)
 
         # Create tab widget
@@ -50,12 +51,8 @@ class Documenter(QWidget):
 
         self.setLayout(self.layout)
 
-        # List to keep track of file threads (if applicable)
-        self.file_threads = []
-
-        # Connect tab context menu
-        self.tab_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.tab_widget.customContextMenuRequested.connect(self.show_tab_context_menu)
+        # Initialize logging window
+        self.logger = LoggingWindow()
 
     def add_document_tab(self):
         tab = QWidget()
@@ -78,10 +75,14 @@ class Documenter(QWidget):
         self.tab_widget.addTab(tab, f"Document {self.tab_widget.count()}")
         self.tab_widget.setCurrentWidget(tab)
 
+        self.logger.log_interaction(f"Added new document tab: Document {self.tab_widget.count()}")
+
     def delete_current_tab(self):
         current_index = self.tab_widget.currentIndex()
         if current_index != -1:
             self.tab_widget.removeTab(current_index)
+            self.logger.log_interaction(f"Deleted document tab: Document {current_index + 1}")
+
 
     def save_documents(self):
         docs_directory = "src/docs"
@@ -107,8 +108,10 @@ class Documenter(QWidget):
                 try:
                     with open(file_path, "w") as file:
                         file.write(content)
+                    self.logger.log_interaction(f"Saved document: {file_name}.{file_type.lower()}")
                 except Exception as e:
                     QMessageBox.critical(self, "Error", f"Failed to save file {file_path}: {e}")
+                    self.logger.log_error(f"Failed to save document: {file_name}.{file_type.lower()}, Error: {str(e)}")
                     return
 
         QMessageBox.information(self, "Success", "Documents saved successfully.")
@@ -136,8 +139,10 @@ class Documenter(QWidget):
                 try:
                     with open(file_path, "w") as file:
                         file.write(content)
+                    self.logger.log_interaction(f"Saved individual document: {file_name}.{file_type.lower()}")
                 except Exception as e:
                     QMessageBox.critical(self, "Error", f"Failed to save file {file_path}: {e}")
+                    self.logger.log_error(f"Failed to save individual document: {file_name}.{file_type.lower()}, Error: {str(e)}")
                     return
 
         QMessageBox.information(self, "Success", "Individual documents saved successfully.")
@@ -163,9 +168,11 @@ class Documenter(QWidget):
             self.tab_widget.setCurrentWidget(text_edit.parentWidget())
 
             self.status_bar.showMessage(f"File '{file_name}' loaded successfully.")
+            self.logger.log_interaction(f"Loaded file: {file_path}")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load file {file_path}: {e}")
+            self.logger.log_error(f"Failed to load file: {file_path}, Error: {str(e)}")
 
     def show_tab_context_menu(self, position):
         tab_index = self.tab_widget.tabBar().tabAt(position)
@@ -205,8 +212,10 @@ class Documenter(QWidget):
                 with open(file_path, "w") as file:
                     file.write(content)
                 QMessageBox.information(self, "Success", f"Document '{file_name}' saved successfully.")
+                self.logger.log_interaction(f"Saved tab content: {file_name}.{file_type.lower()}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file {file_path}: {e}")
+                self.logger.log_error(f"Failed to save tab content: {file_name}.{file_type.lower()}, Error: {str(e)}")
 
     def rename_tab(self, tab_index):
         tab_widget = self.tab_widget.widget(tab_index)
@@ -215,7 +224,16 @@ class Documenter(QWidget):
         if ok_pressed and new_tab_text:
             self.tab_widget.setTabText(tab_index, new_tab_text)
             self.status_bar.showMessage(f"Document renamed to '{new_tab_text}'.")
+            self.logger.log_interaction(f"Renamed tab: Document {tab_index + 1} to {new_tab_text}")
 
     def clear_all_tabs(self):
         self.tab_widget.clear()
+        self.logger.log_interaction("Cleared all document tabs.")
 
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message', 'Are you sure you want to quit?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
