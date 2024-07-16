@@ -182,7 +182,7 @@ class MainStackedWidget(QStackedWidget):
             self.current_window_name = "Documenter"
         elif window == LoggingWindow:
             self.setCurrentWidget(self.logging_window)
-            self.current_window_name = "Logging"
+            self.current_window_name = "Logs"
         
         self.window_opened.emit(f"Opened {self.current_window_name}")
 
