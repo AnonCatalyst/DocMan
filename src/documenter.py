@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 from src.logging import LoggingWindow
+import os 
 
 class Documenter(QWidget):
     open_document = pyqtSignal(str)
