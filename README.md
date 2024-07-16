@@ -6,6 +6,9 @@ DocMan is a document management system designed to streamline workflows and impr
 
 # TO-DO
 - `Add an icon for DocMan`
+- `Fix issue with unable to create or open folders`
+- `Fix issue where there is no visual indicator of what files have been tagged`
+- `Fix issue with not being able to batch process delete all tagged folders or files`
 
 ### DocMan: Documents & Documenter Window Update
 
