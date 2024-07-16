@@ -1,18 +1,19 @@
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QToolBar, QLabel, QVBoxLayout, QWidget, 
-    QPushButton, QDockWidget, QFrame, QStackedWidget, QTextBrowser
-)
-from PyQt6.QtCore import Qt, pyqtSignal, QThread, QUrl
-from PyQt6.QtGui import QPixmap, QDesktopServices
 import os
 import sys
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QDateTime
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QToolBar, QLabel, QVBoxLayout, QWidget,
+    QPushButton, QDockWidget, QFrame, QStackedWidget, QTextEdit
+)
+from PyQt6.QtGui import QPixmap, QAction
+import logging
 
 # Import custom windows
 from src.documents import DocumentsWindow
 from src.documenter import Documenter
 from src.help import HelpWindow
 from src.home import HomeWindow
-
+from src.logging import LoggingWindow
 
 class ImageLoader(QThread):
     image_loaded = pyqtSignal(QPixmap)
@@ -27,7 +28,6 @@ class ImageLoader(QThread):
         if pixmap.load(self.file_path):
             self.image_loaded.emit(pixmap)
         self.finished.emit()
-
 
 class SideMenu(QWidget):
     def __init__(self, parent=None):
@@ -46,7 +46,6 @@ class SideMenu(QWidget):
         self.load_logo_image_async()
 
     def setup_logo(self):
-        """Sets up the logo and description under it."""
         self.logo_label = QLabel()
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.logo_label)
@@ -62,7 +61,6 @@ class SideMenu(QWidget):
         self.layout.addWidget(self.logo_description)
 
     def setup_menu_buttons(self):
-        """Creates and styles menu buttons."""
         menu_items = ["DOCUMENTS", "DOCUMENTER"]
         for item in menu_items:
             button = QPushButton(item)
@@ -90,7 +88,6 @@ class SideMenu(QWidget):
         self.layout.addWidget(self.button_separator)
 
     def setup_description(self):
-        """Adds the description label."""
         self.button_description = QLabel("""DocMan was developed during
 the 2024 v5 BackDropBuild
 session (July 8 - August 3,
@@ -115,7 +112,6 @@ lows and data management.""")
         self.layout.addStretch()
 
     def load_logo_image_async(self):
-        """Loads logo image asynchronously."""
         file_path = os.path.join('src', 'assets', 'icons', 'side_logo.png')
         self.image_loader = ImageLoader(file_path)
         self.image_loader.image_loaded.connect(self.update_logo)
@@ -123,11 +119,9 @@ lows and data management.""")
         self.image_loader.start()
 
     def update_logo(self, pixmap):
-        """Updates the logo label with the loaded pixmap."""
         self.logo_label.setPixmap(pixmap.scaledToWidth(100))
 
     def cleanup_thread(self):
-        """Cleans up the image loader thread."""
         if self.image_loader is not None:
             self.image_loader.quit()
             self.image_loader.wait()
@@ -135,10 +129,10 @@ lows and data management.""")
             self.image_loader = None
 
     def handle_menu_item_click(self):
-        """Handles menu item clicks to switch windows."""
         sender = self.sender()
         if sender:
             item_name = sender.objectName()
+            self.parent.log_interaction(f"Button clicked: {item_name}")
             if item_name == "DOCUMENTS":
                 self.parent.show_window(DocumentsWindow)
             elif item_name == "DOCUMENTER":
@@ -148,31 +142,49 @@ lows and data management.""")
         self.cleanup_thread()
         event.accept()
 
-
 class MainStackedWidget(QStackedWidget):
+    window_opened = pyqtSignal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.home_window = HomeWindow()
         self.help_window = HelpWindow()
         self.documents_window = DocumentsWindow()
         self.documenter_window = Documenter()
+        self.logging_window = LoggingWindow()
 
         self.addWidget(self.home_window)
         self.addWidget(self.help_window)
         self.addWidget(self.documents_window)
         self.addWidget(self.documenter_window)
+        self.addWidget(self.logging_window)
+
+        self.current_window_start_time = None
+        self.current_window_name = None
 
     def show_window(self, window):
-        """Shows the specified window."""
+        if self.current_window_name:
+            duration = QDateTime.currentDateTime().toSecsSinceEpoch() - self.current_window_start_time.toSecsSinceEpoch()
+            self.window_opened.emit(f"Closed {self.current_window_name}, duration: {duration} seconds")
+
+        self.current_window_start_time = QDateTime.currentDateTime()
         if window == HomeWindow:
             self.setCurrentWidget(self.home_window)
+            self.current_window_name = "Home"
         elif window == HelpWindow:
             self.setCurrentWidget(self.help_window)
+            self.current_window_name = "Help"
         elif window == DocumentsWindow:
             self.setCurrentWidget(self.documents_window)
+            self.current_window_name = "Documents"
         elif window == Documenter:
             self.setCurrentWidget(self.documenter_window)
-
+            self.current_window_name = "Documenter"
+        elif window == LoggingWindow:
+            self.setCurrentWidget(self.logging_window)
+            self.current_window_name = "Logging"
+        
+        self.window_opened.emit(f"Opened {self.current_window_name}")
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -185,6 +197,8 @@ class MainWindow(QMainWindow):
         self.setup_toolbar()
         self.setup_central_widget()
         self.setup_side_menu()
+
+        self.setup_logging()
 
         self.setStyleSheet("""
             QMainWindow {
@@ -210,26 +224,27 @@ class MainWindow(QMainWindow):
 
         self.add_toolbar_button(toolbar, "HOME")
         self.add_toolbar_button(toolbar, "HELP")
+        self.add_toolbar_button(toolbar, "LOGGING")
 
     def add_toolbar_button(self, toolbar, text):
-        """Adds a button to the toolbar."""
         button = QPushButton(text)
         button.setStyleSheet("padding: 8px; font-size: 14px; background-color: #2c3e50; color: #ecf0f1; border: none;")
         button.clicked.connect(self.handle_toolbar_button_click)
         toolbar.addWidget(button)
 
     def handle_toolbar_button_click(self):
-        """Handles toolbar button clicks to switch windows."""
         sender = self.sender()
         if sender:
             item_name = sender.text()
+            self.log_interaction(f"Toolbar button clicked: {item_name}")
             if item_name == "HOME":
                 self.show_window(HomeWindow)
             elif item_name == "HELP":
                 self.show_window(HelpWindow)
+            elif item_name == "LOGGING":
+                self.show_window(LoggingWindow)
 
     def setup_central_widget(self):
-        """Sets up the central widget with a stacked layout."""
         central_widget = QWidget()
         central_layout = QVBoxLayout()
         self.stacked_widget = MainStackedWidget()
@@ -240,34 +255,43 @@ class MainWindow(QMainWindow):
         central_frame.setStyleSheet("background-color: #2c3e50; border: 2px solid #34495e;")
         central_frame.setLayout(central_layout)
 
-        self.setCentralWidget(central_frame)
+        central_widget_layout = QVBoxLayout(central_widget)
+        central_widget_layout.setContentsMargins(0, 0, 0, 0)
+        central_widget_layout.addWidget(central_frame)
+
+        self.setCentralWidget(central_widget)
 
     def setup_side_menu(self):
-        """Sets up the side menu dock widget."""
-        dock_widget = QDockWidget(self)
-        dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
+        side_menu = SideMenu(self)
+        dock = QDockWidget()
+        dock.setWidget(side_menu)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        dock.setTitleBarWidget(QWidget())
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
 
-        self.side_menu = SideMenu(self)
-        self.side_menu.setStyleSheet("QDockWidget { border: none; }")
+    def show_window(self, window):
+        self.stacked_widget.show_window(window)
 
-        dock_widget.setFeatures(dock_widget.features() & ~QDockWidget.DockWidgetFeature.DockWidgetClosable)
-        dock_widget.setWidget(self.side_menu)
-        dock_widget.setMinimumWidth(150)
-        dock_widget.setMaximumWidth(150)
+    def setup_logging(self):
+        self.logging_window = self.stacked_widget.logging_window
+        self.stacked_widget.window_opened.connect(self.log_interaction)
 
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock_widget)
+        logging.basicConfig(filename='docman.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def show_window(self, window_class):
-        """Shows the specified window in the stacked widget."""
-        self.stacked_widget.show_window(window_class)
+    def log_interaction(self, message):
+        self.logging_window.log_interaction(message)
+        logging.info(message)
 
+    def log_error(self, message):
+        self.logging_window.log_error(message)
+        logging.error(message)
 
-def main():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
-
+    def closeEvent(self, event):
+        self.log_interaction("Application closed")
+        event.accept()
 
 if __name__ == "__main__":
-    main()
+    app = QApplication(sys.argv)
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec())
