@@ -241,7 +241,7 @@ class MainWindow(QMainWindow):
                 self.show_window(HomeWindow)
             elif item_name == "HELP":
                 self.show_window(HelpWindow)
-            elif item_name == "LOGGING":
+            elif item_name == "LOGS":
                 self.show_window(LoggingWindow)
 
     def setup_central_widget(self):
