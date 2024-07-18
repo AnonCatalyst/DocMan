@@ -143,17 +143,11 @@ class DocumentsWindow(QWidget):
         menu.addAction("Copy Tagged", self.copy_tagged_items)
         menu.addAction("Paste Tagged", self.paste_tagged_items)
         menu.addAction("Delete Tagged", self.delete_tagged_items)
-        menu.addAction("Stop Tagging" if self.tagging_active else "Start Tagging", self.toggle_tagging)
         menu.addAction("Untag All", self.model.untag_all)
 
         # Display the menu at the toolbar's position
         menu.exec(self.toolbar.mapToGlobal(self.toolbar.rect().bottomLeft()))
 
-
-    def toggle_tagging(self):
-        self.tagging_active = not self.tagging_active
-        self.status_indicator.setText(f"Tagging: {'Active' if self.tagging_active else 'Inactive'}")
-        self.logger.log_interaction(f"Tagging {'started' if self.tagging_active else 'stopped'}")
 
     def handle_double_click(self, index):
         item_path = self.model.filePath(index)
