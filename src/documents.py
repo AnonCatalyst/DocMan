@@ -4,7 +4,7 @@ import shutil
 from src.logging import LoggingWindow
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QWidget, QTreeView, QInputDialog, 
-    QMessageBox, QToolBar, QLabel, QSplitter, QMenu
+    QMessageBox, QToolBar, QLabel, QSplitter, QMenu, QFileDialog
 )
 from PyQt6.QtGui import QIcon, QAction, QFileSystemModel, QPixmap, QPainter, QPen, QStandardItemModel, QStandardItem, QFileSystemModel
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QModelIndex, QAbstractItemModel
@@ -123,13 +123,12 @@ class DocumentsWindow(QWidget):
             ("folder-new", "Create Folder", self.create_folder),
             ("edit-delete", "Delete", self.delete_item),
             ("edit-rename", "Rename", self.rename_item),
-            ("document-open", "Open", self.open_item),
             ("document-properties", "Properties", self.show_properties),
             ("go-up", "Go Up", self.go_up),
             ("edit-cut", "Cut", self.cut_item),
             ("edit-copy", "Copy", self.copy_item),
             ("edit-paste", "Paste", self.paste_item),
-            ("view-refresh", "| Batch Process Menu |", self.show_batch_process_menu),
+            ("batch-process-menu", "| Batch Process Menu |", self.show_batch_process_menu),
             ("tag", "Tag Document", self.tag_item),
         ]
 
@@ -159,7 +158,6 @@ class DocumentsWindow(QWidget):
     def handle_double_click(self, index):
         item_path = self.model.filePath(index)
         self.tree.setRootIndex(index if os.path.isdir(item_path) else self.tree.rootIndex())
-        self.open_item()
         self.logger.log_interaction(f"Double clicked on item: {item_path}")
 
 
@@ -201,20 +199,16 @@ class DocumentsWindow(QWidget):
                 new_path = os.path.join(os.path.dirname(item_path), new_name)
                 try:
                     os.rename(item_path, new_path)
-                    self.model.refresh(index.parent())
+                    # Refresh the model
+                    self.model.setRootPath(self.model.rootPath())
                     self.logger.log_interaction(f"Renamed item: {item_path} to {new_path}")
                     QMessageBox.information(self, "Item Renamed", f"Renamed item: {item_path} to {new_path}")
                 except OSError as e:
                     self.logger.log_error(f"Error renaming item: {str(e)}")
                     QMessageBox.critical(self, "Error", f"Failed to rename item: {str(e)}")
 
-    def open_item(self):
-        index = self.tree.currentIndex()
-        if index.isValid():
-            item_path = self.model.filePath(index)
-            if os.path.isfile(item_path):
-                self.open_document.emit(item_path)
-                self.logger.log_interaction(f"Opened item: {item_path}")
+
+
 
     def show_properties(self):
         index = self.tree.currentIndex()
