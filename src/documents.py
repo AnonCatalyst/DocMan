@@ -75,7 +75,7 @@ class DocumentsWindow(QWidget):
         self.tree.doubleClicked.connect(self.handle_double_click)
         self.tree.selectionModel().selectionChanged.connect(self.update_preview)
 
-        self.preview = QLabel("Preview Pane")
+        self.preview = QLabel("𝗣𝗿𝗲𝘃𝗶𝗲𝘄 𝗣𝗮𝗻𝗲")
         self.preview.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         self.preview.setWordWrap(True)
         self.preview.setFixedWidth(300)
@@ -120,16 +120,15 @@ class DocumentsWindow(QWidget):
 
     def setup_actions(self):
         actions = [
-            ("folder-new", "Create Folder", self.create_folder),
-            ("edit-delete", "Delete", self.delete_item),
+            ("folder-new", "🖿", self.create_folder),
+            ("go-up", "🢁", self.go_up),
             ("edit-rename", "Rename", self.rename_item),
             ("document-properties", "Properties", self.show_properties),
-            ("go-up", "Go Up", self.go_up),
-            ("edit-cut", "Cut", self.cut_item),
             ("edit-copy", "Copy", self.copy_item),
             ("edit-paste", "Paste", self.paste_item),
-            ("batch-process-menu", "| Batch Process Menu |", self.show_batch_process_menu),
-            ("tag", "Tag Document", self.tag_item),
+            ("batch-process-menu", "𝗕𝗮𝘁𝗰𝗵 𝗣𝗿𝗼𝗰𝗲𝘀𝘀 𝗠𝗲𝗻𝘂", self.show_batch_process_menu),
+            ("tag", "𝗧𝗮𝗴 𝗗𝗼𝗰𝘂𝗺𝗲𝗻𝘁", self.tag_item),
+            ("edit-delete", "🗑", self.delete_item),
         ]
 
         for icon_name, action_name, method in actions:
@@ -220,10 +219,6 @@ class DocumentsWindow(QWidget):
         parent_index = current_index.parent() if current_index.parent().isValid() else self.model.index(self.model.rootPath())
         self.tree.setRootIndex(parent_index)
         self.logger.log_interaction(f"Navigated up to: {self.model.filePath(parent_index)}")
-
-    def cut_item(self):
-        self.clipboard = self.tree.selectedIndexes()
-        self.logger.log_interaction("Cut items to clipboard")
 
     def copy_item(self):
         self.clipboard = self.tree.selectedIndexes()
