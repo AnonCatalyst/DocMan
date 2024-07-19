@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QToolBar, QLabel, QVBoxLayout, QWidget,
     QPushButton, QDockWidget, QFrame, QStackedWidget, QTextEdit
 )
-from PyQt6.QtGui import QPixmap, QAction
+from PyQt6.QtGui import QPixmap, QAction, QIcon
 import logging
 
 # Import custom windows
@@ -61,7 +61,7 @@ class SideMenu(QWidget):
         self.layout.addWidget(self.logo_description)
 
     def setup_menu_buttons(self):
-        menu_items = ["DOCUMENTS", "DOCUMENTER"]
+        menu_items = ["🗂 DOCUMENTS", "🖋 DOCUMENTER"]
         for item in menu_items:
             button = QPushButton(item)
             button.setObjectName(item)
@@ -133,9 +133,9 @@ lows and data management.""")
         if sender:
             item_name = sender.objectName()
             self.parent.log_interaction(f"Button clicked: {item_name}")
-            if item_name == "DOCUMENTS":
+            if item_name == "🗂 DOCUMENTS":
                 self.parent.show_window(DocumentsWindow)
-            elif item_name == "DOCUMENTER":
+            elif item_name == "🖋 DOCUMENTER":
                 self.parent.show_window(Documenter)
 
     def closeEvent(self, event):
@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("DocMan")
+        self.setWindowTitle("𝗗𝗼𝗰𝗠𝗮𝗻 ⮷")
         self.setGeometry(300, 300, 1100, 600)
         self.setFixedWidth(1100)
 
@@ -222,9 +222,9 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
         toolbar.setFloatable(False)
 
-        self.add_toolbar_button(toolbar, "HOME")
-        self.add_toolbar_button(toolbar, "HELP")
-        self.add_toolbar_button(toolbar, "LOGS")
+        self.add_toolbar_button(toolbar, "ʜᴏᴍᴇ")
+        self.add_toolbar_button(toolbar, "ʜᴇʟᴘ")
+        self.add_toolbar_button(toolbar, "ʟᴏɢꜱ")
 
     def add_toolbar_button(self, toolbar, text):
         button = QPushButton(text)
@@ -237,11 +237,11 @@ class MainWindow(QMainWindow):
         if sender:
             item_name = sender.text()
             self.log_interaction(f"Toolbar button clicked: {item_name}")
-            if item_name == "HOME":
+            if item_name == "ʜᴏᴍᴇ":
                 self.show_window(HomeWindow)
-            elif item_name == "HELP":
+            elif item_name == "ʜᴇʟᴘ":
                 self.show_window(HelpWindow)
-            elif item_name == "LOGS":
+            elif item_name == "ʟᴏɢꜱ":
                 self.show_window(LoggingWindow)
 
     def setup_central_widget(self):
@@ -292,6 +292,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon('src/assets/icons/side_logo.png'))
     main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec())
