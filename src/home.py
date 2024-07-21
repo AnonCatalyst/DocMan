@@ -24,10 +24,9 @@ class HomeWindow(QMainWindow):
             ("Preview Pane", "Quickly preview file content directly within the application for easy reference and management."),
             ("Batch Operations", "Perform bulk actions such as renaming or deleting multiple files at once to streamline your workflow.")
         ])
-        self.add_feature_section("Documenter: Creating and Editing Documents", [
+        self.add_feature_section("Documenter 'Creating and Editing Documents'", [
             ("Create and Edit", "Use the Documenter module to create, edit, and manage various document types within individual tabs."),
-            ("Save and Load", "Easily save individual documents or all open documents to specified directories. Load existing files for quick editing and management."),
-            ("Context Menu", "Right-click on tabs for options like saving changes and renaming documents, enhancing document management efficiency.")
+            ("Save and Load", "Easily save individual documents or all open documents to specified directories. Load existing files for quick editing and management.")
         ])
 
     def set_dark_theme(self):
