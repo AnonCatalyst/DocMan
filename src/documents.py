@@ -215,10 +215,19 @@ class DocumentsWindow(QWidget):
             QMessageBox.information(self, "Properties", properties)
 
     def go_up(self):
-        current_index = self.tree.currentIndex()
-        parent_index = current_index.parent() if current_index.parent().isValid() else self.model.index(self.model.rootPath())
+        current_index = self.tree.rootIndex()
+        current_path = self.model.filePath(current_index)
+        parent_path = os.path.dirname(current_path)
+        parent_index = self.model.index(parent_path)
+
+        # Set the new root index to the parent directory
         self.tree.setRootIndex(parent_index)
-        self.logger.log_interaction(f"Navigated up to: {self.model.filePath(parent_index)}")
+        
+        # Untag all items when going up
+        self.model.untag_all()
+        
+        self.logger.log_interaction(f"Navigated up from {current_path} to {parent_path}")
+
 
     def copy_item(self):
         self.clipboard = self.tree.selectedIndexes()
