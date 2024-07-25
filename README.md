@@ -2,6 +2,8 @@
 
 DocMan is a document management system designed to streamline workflows and improve efficiency in OSINT investigations. Developed as a result of participation in the BackDropBuild v5 session from July 8th to August 3rd, DocMan provides a centralized interface for managing, editing, and organizing documents, facilitating collaboration and enhancing productivity.
 
+https://youtu.be/zle5-4p7R1o?si=f7pP5W67m1lN8pJP
+
 <img src="src/img/screenshot.png" alt="DocMan: Document Manager (GUI) - screenshot" width="700" height="400"/>
 
 ## BackDropBuild v5 Session
