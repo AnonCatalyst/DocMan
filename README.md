@@ -6,10 +6,6 @@ Tutorial: https://youtu.be/zle5-4p7R1o?si=f7pP5W67m1lN8pJP
 
 <img src="src/img/screenshot.png" alt="DocMan: Document Manager (GUI) - screenshot" width="700" height="400"/>
 
-## BackDropBuild v5 Session
-
-BackDropBuild v5 is a collaborative session focused on developing tools and solutions for enhancing OSINT capabilities. Held from July 8th to August 3rd, the session aims to address challenges in open-source intelligence gathering by fostering innovation and collaboration among participants.
-
 Learn more about [BackDropBuild](https://backdropbuild.com).
 
 Explore the specific build session for DocMan at [BackDropBuild v5 - OSINT Document Manager](https://backdropbuild.com/builds/v5/osint-document-manager).
