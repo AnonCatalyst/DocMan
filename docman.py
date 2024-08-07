@@ -93,19 +93,19 @@ the 2024 v5 BackDropBuild
 session (July 8 - August 3,
 2024) to enhance OSINT
 investigations. This four
--week program provided fu
-nding and support for inn
-ovative solutions. DocMan
-was created to meet the 
-specific needs of OSINT 
-professionals, offering a
-robust document management
-system. The development
-focused on modern software
-practices, modular arch
-itecture, and user-centric
-design to improve workf
-lows and data management.""")
+-week program provided su
+pport for innovative solu
+tions. DocMan was created
+to meet the specific needs
+of OSINT professionals, 
+offering a robust document
+management system. The de
+velopment focused on mode
+rn software practices, mo
+dular architecture, and u
+ser-centric design to im
+prove workflows and data 
+management.""")
         self.button_description.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.button_description.setStyleSheet("color: #888888; font-size: 10px;")
         self.layout.addWidget(self.button_description)
